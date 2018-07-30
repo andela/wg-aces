@@ -86,21 +86,23 @@ INSTALLED_APPS = (
 
     # django-bower for installing bower packages
     'djangobower',
+
+    'django_extensions',
 )
 
 # added list of external libraries to be installed by bower
 BOWER_INSTALLED_APPS = (
-    'jquery#2.1.x',
-    'bootstrap',
-    'd3',
-    'shariff',
-    'tinymce-dist',
-    'DataTables',
-    'components-font-awesome',
-    'tinymce',
-    'metrics-graphics',
-    'devbridge-autocomplete#1.2.x',
-    'sortablejs#1.4.x',
+   'bootstrap#3.3.5',
+   'components-font-awesome#4.7.x',
+   'd3',
+   'DataTables',
+   'devbridge-autocomplete#1.2.x',
+   'jquery#2.1.x',
+   'metrics-graphics',
+   'shariff#1.24.1',
+   'sortablejs#1.4.x',
+   'tinymce',
+   'tinymce-dist',
 )
 
 
