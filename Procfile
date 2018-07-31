@@ -1,2 +1,2 @@
-web: gunicorn wger.wsgi.application
+web: gunicorn wger.wsgi:application
 release: bash ./release.sh
