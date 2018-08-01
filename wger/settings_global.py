@@ -86,6 +86,9 @@ INSTALLED_APPS = (
 
     # django-bower for installing bower packages
     'djangobower',
+
+    # django social login
+    'social_django',
 )
 
 # added list of external libraries to be installed by bower
@@ -101,6 +104,7 @@ BOWER_INSTALLED_APPS = (
     'metrics-graphics',
     'devbridge-autocomplete#1.2.x',
     'sortablejs#1.4.x',
+    'bootstrap-social'
 )
 
 
@@ -127,9 +131,17 @@ MIDDLEWARE_CLASSES = (
     # Django mobile
     'django_mobile.middleware.MobileDetectionMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
+
+    # Django social
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.open_id.OpenIdAuth',
+    'social_core.backends.google.GoogleOpenId',
+    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
     'wger.utils.helpers.EmailAuthBackend'
 )
@@ -155,7 +167,11 @@ TEMPLATES = [
                 'django_mobile.context_processors.flavour',
 
                 # Breadcrumbs
-                'django.template.context_processors.request'
+                'django.template.context_processors.request',
+
+                # Django social
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect'
             ],
             'loaders': [
                 # Django mobile
@@ -196,6 +212,24 @@ EMAIL_SUBJECT_PREFIX = '[wger] '
 LOGIN_URL = '/user/login'
 LOGIN_REDIRECT_URL = '/'
 
+#
+# social login
+#
+# google
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('SOCIAL\
+_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('SOCIAL\
+_AUTH_GOOGLE_OAUTH2_SECRET')
+
+# facebook
+SOCIAL_AUTH_FACEBOOK_KEY = os.getenv('SOCIAL\
+_AUTH_FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.getenv('SOCIAL_AUTH_\
+FACEBOOK_SECRET')
+
+# twitter
+SOCIAL_AUTH_TWITTER_KEY = os.getenv('SOCIAL_AUTH_TWITTER_KEY')
+SOCIAL_AUTH_TWITTER_SECRET = os.getenv('SOCIAL_AUTH_TWITTER_SECRET')
 
 #
 # Internationalization
