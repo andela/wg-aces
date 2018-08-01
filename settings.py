@@ -29,7 +29,7 @@ if os.environ.get('DB') == 'postgresql':
 # Configuration For Heroku Database
 if os.environ.get('DB') == 'heroku':
     DATABASES = {
-        'default': dj_database_url_config(default=config('DATABASE_URL'))
+        'default': dj_database_url.config(default=config('DATABASE_URL'))
     }
 
 # Make this unique, and don't share it with anybody.
