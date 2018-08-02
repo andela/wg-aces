@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import dj_database_url
 from decouple import config
-from wger.settings_global import *
+
+from wger.settings_global import *  # noqa F403
 
 # Use 'DEBUG = True' to get more details for server errors
 DEBUG = True
-TEMPLATES[0]['OPTIONS']['debug'] = True
+TEMPLATES[0]['OPTIONS']['debug'] = True  # noqa E405
 
 ADMINS = (
     ('Your name', 'your_email@example.com'),
@@ -18,18 +20,18 @@ if os.environ.get('DB') == 'postgresql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME','wger'),
-            'USER': os.environ.get('DB_USER','postgres'),
+            'NAME': os.environ.get('DB_NAME', 'wger'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
             'PASSWORD': os.environ.get('DB_PASSWORD'),
-            'HOST': os.environ.get('DB_HOST','localhost'),
-            'PORT': os.environ.get('DB_PORT','5432'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
 
 # Configuration For Heroku Database
 if os.environ.get('DB') == 'heroku':
     DATABASES = {
-        'default': dj_database_url.config(default=config('DATABASE_URL'))
+        'default': dj_database_url.config(default=config('DATABASE_URL'))  # noqa E405
     }
 
 # Make this unique, and don't share it with anybody.
@@ -53,14 +55,14 @@ MEDIA_URL = '/media/'
 ALLOWED_HOSTS = '*'
 
 # This might be a good idea if you setup memcached
-#SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # Configure a real backend in production
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Sender address used for sent emails
-WGER_SETTINGS['EMAIL_FROM'] = 'wger Workout Manager <wger@example.com>'
+WGER_SETTINGS['EMAIL_FROM'] = 'wger Workout Manager <wger@example.com>'  # noqa E405
 
 # Your twitter handle, if you have one for this instance.
-#WGER_SETTINGS['TWITTER'] = ''
+# WGER_SETTINGS['TWITTER'] = ''
