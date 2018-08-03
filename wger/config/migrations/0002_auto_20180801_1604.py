@@ -15,7 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='gymconfig',
             name='default_gym',
-            field=models.ForeignKey,),
+            field=models.ForeignKey(
+                    blank=True, to='gym.Gym',
+                    help_text='Select the default gym for this installation.\
+                    This will assign all new registered users to this gym\
+                    and update all existing users without a gym.',
+                    null=True, verbose_name='Default gym'),),
         migrations.AlterField(
             model_name='languageconfig',
             name='item',
