@@ -25,11 +25,42 @@ from wger.exercises.models import (
 )
 
 
+class MuscleSerializer(serializers.ModelSerializer):
+    '''
+    Muscle serializer
+    '''
+
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Muscle
+
+    def get_image_url(self, obj):
+        return 'images/muscles/main/muscle-%s.svg' % obj.id
+
+
+class MuscleSecondarySerializer(serializers.ModelSerializer):
+    '''
+    Secondary Muscle serializer
+    '''
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Muscle
+
+    def get_image_url(self, obj):
+        return 'images/muscles/secondary/muscle-%s.svg' % obj.id
+
+
 class ExerciseSerializer(serializers.ModelSerializer):
     '''
     Exercise serializer
     '''
+    muscles = MuscleSerializer(read_only=True, many=True)
+    muscles_secondary = MuscleSecondarySerializer(read_only=True, many=True)
+
     class Meta:
+        depth = 2
         model = Exercise
 
 
@@ -63,11 +94,3 @@ class ExerciseCommentSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = ExerciseComment
-
-
-class MuscleSerializer(serializers.ModelSerializer):
-    '''
-    Muscle serializer
-    '''
-    class Meta:
-        model = Muscle
