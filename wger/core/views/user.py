@@ -14,57 +14,50 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 
+import base64
+import datetime
 import logging
+import os
+from datetime import date
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.template.context_processors import csrf
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _, ugettext_lazy
-from django.utils import translation
-from django.contrib.auth.mixins import (PermissionRequiredMixin,
-                                        LoginRequiredMixin)
+import requests
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User as Django_User, User
 from django.contrib.auth.views import login as django_loginview
-from django.contrib import messages
-from django.views.generic import (
-    RedirectView,
-    UpdateView,
-    DetailView,
-    ListView
-)
-from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.db.utils import IntegrityError
+from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.template.context_processors import csrf
+from django.utils import translation
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy
+from django.views.generic import DetailView, ListView, RedirectView, UpdateView
+from fitbit import FitbitOauth2Client
 from rest_framework.authtoken.models import Token
 
-from wger.utils.constants import USER_TAB
-from wger.utils.generic_views import (WgerFormMixin,
-                                      WgerMultiplePermissionRequiredMixin)
-from wger.utils.user_agents import check_request_amazon, check_request_android
-from wger.core.forms import (
-    UserPreferencesForm,
-    UserPersonalInformationForm,
-    PasswordConfirmationForm,
-    RegistrationForm,
-    RegistrationFormNoCaptcha,
-    UserLoginForm)
-from wger.core.models import Language
-from wger.manager.models import (
-    WorkoutLog,
-    WorkoutSession,
-    Workout
-)
-from wger.nutrition.models import NutritionPlan
 from wger.config.models import GymConfig
+from wger.core.forms import (PasswordConfirmationForm, RegistrationForm,
+                             RegistrationFormNoCaptcha,
+                             UserLoginForm, UserPersonalInformationForm,
+                             UserPreferencesForm)
+from wger.core.models import Language
+from wger.exercises.models import Exercise, ExerciseCategory
+from wger.gym.models import AdminUserNote, Contract, GymUserConfig
+from wger.manager.models import Workout, WorkoutLog, WorkoutSession
+from wger.nutrition.models import NutritionPlan
+from wger.utils.constants import USER_TAB
+from wger.utils.generic_views import WgerFormMixin
+from wger.utils.generic_views import WgerMultiplePermissionRequiredMixin
+from wger.utils.user_agents import check_request_amazon, check_request_android
 from wger.weight.models import WeightEntry
-from wger.gym.models import (
-    AdminUserNote,
-    GymUserConfig,
-    Contract
-)
 
 logger = logging.getLogger(__name__)
 
@@ -521,6 +514,69 @@ class UserDetailView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin,
         return context
 
 
+def add_excersise(request, response_activity, weight):
+    entry = WeightEntry()
+    entry.weight = weight
+    entry.user = request.user
+    entry.date = datetime.date.today()
+    entry.save()
+    messages.success(
+        request, _('Successfully synced weight data.'))
+
+    if not ExerciseCategory.objects.filter(name='Fitbit'):
+        fitbit_category = ExerciseCategory()
+        fitbit_category.name = 'Fitbit'
+        fitbit_category.save()
+
+    for detail in response_activity.json()['activities']:
+        name = detail['name']
+        description = detail['description']
+
+        exercise = Exercise()
+        exercise.name_original = name
+        exercise.name = name
+        exercise.category = ExerciseCategory.objects.get(
+            name='Fitbit')
+        exercise.description = description
+        exercise.language = Language.objects.get(
+            short_name='en')
+        exercise.save()
+
+
+def handle_errors(find_error, template_data, requests, request,
+                  redirect_uri, fitbit_client, response_weight,
+                  user_id, headers):
+    for key in find_error.keys():
+        if "errors" in find_error:
+            messages.info(request, _(
+                'Make sure the profile is checked.'))
+            template_data['fitbit_auth_link'] =\
+                fitbit_client.authorize_token_url(
+                redirect_uri=redirect_uri,
+                prompt='consent')[0]
+            return render(request, 'user/fitbit_support.html',
+                          template_data)
+
+    else:
+        today = date.today()
+        weight = response_weight.json()['user']['weight']
+        response_nutrition = requests.get(
+            'https://api.fitbit.com/1/user/' +
+            user_id +
+            '/foods/log/date/{date}.json'.format(
+                date=today),
+            headers=headers)
+
+        response_activity = requests.get(
+            'https://api.fitbit.com/1/user/' +
+            user_id +
+            '/activities/date/{date}.json'.format(
+                date=today),
+            headers=headers)
+        return ({"weight": weight, "response_activity": response_activity,
+                 "response_nutrition": response_nutrition})
+
+
 class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     '''
     Overview of all users in the instance
@@ -556,3 +612,79 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                                           _('Gym')],
                                  'users': context['object_list']['members']}
         return context
+
+
+@login_required
+def add_fitbit_support(request, code=None):
+    """
+    Get data from fitbit upon the user authorizing Wger to access their data.
+    """
+    template_data = {}
+    client_id = os.environ.get('CLIENT_ID', "22CY22")
+    client_secret = os.environ.get('CLIENT_SECRET',
+                                   "25058b02498c0b78ce12249454570331")
+    redirect_uri = os.environ.get('REDIRECT_URI')
+
+    # 'https://wg-aces.herokuapp.com/en/user/add_fitbit'
+    # Get fitbit token from enviromnent variables
+
+    fitbit_client = FitbitOauth2Client(client_id, client_secret)
+
+    if 'code' in request.GET:  # get token
+        code = request.GET.get("code", "")
+        form = {
+            'client_secret': client_secret,
+            'code': code,
+            'client_id': client_id,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_uri
+        }
+        encode_string = client_id + ':' + client_secret
+        data = base64.b64encode(encode_string.encode())
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": "Basic " + data.decode()
+        }
+
+        # Get user weight data from fitbit
+        response = requests.post(
+            fitbit_client.request_token_url, form, headers=headers).json()
+
+        if "access_token" in response:
+            token = response['access_token']
+            user_id = response['user_id']
+            headers['Authorization'] = 'Bearer ' + token
+
+            response_weight = requests.get(
+                'https://api.fitbit.com/1/user/' + user_id + '/profile.json',
+                headers=headers)
+
+            find_error = response_weight.json()
+
+            handled = handle_errors(find_error, template_data, requests,
+                                    request, redirect_uri, fitbit_client,
+                                    response_weight, user_id, headers)
+            try:
+                response_activity = handled["response_activity"]
+                weight = handled["weight"]
+                add_excersise(request, response_activity, weight)
+            except IntegrityError as error:
+                if error:
+                    messages.info(request, _(
+                        'Already synced up for today.'))
+                return render(request, 'user/fitbit_support.html',
+                              template_data)
+
+            return HttpResponseRedirect(reverse(
+                'weight:overview',
+                kwargs={'username': request.user.username}))
+        else:
+            messages.warning(request, _('Something went wrong.'))
+            return render(request, 'user/fitbit_support.html', template_data)
+
+    # link to page that makes user authorize wger to access their fitbit
+    template_data['fitbit_auth_link'] = fitbit_client.authorize_token_url(
+        redirect_uri=redirect_uri, prompt='consent')[0]
+
+    return render(request, 'user/fitbit_support.html', template_data)
