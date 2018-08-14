@@ -2234,7 +2234,8 @@
             "muscles_secondary": [
                 2,
                 1,
-                13
+                13,
+                19
             ],
             "description": "<p>The execution of this exercise is very similar to the regular bent over rowing, only that the bar is fixed here.</p>\n<p>Grab the barbell with a wide grip (slightly more than shoulder wide) and lean forward. Your upper body is not quite parallel to the floor, but forms a slight angle. The chest's out during the whole exercise. Pull now the barbell with a fast movement towards your belly button, not further up. Go slowly down to the initial position. Don't swing with your body and keep your arms next to your body.</p>",
             "equipment": [],
@@ -2924,7 +2925,8 @@
             "category": 12,
             "uuid": "d46adbda-7c60-42a0-b1fd-9ec111b35956",
             "muscles": [
-                12
+                12,
+                20
             ],
             "license": 1,
             "name": "Pull ups on machine"
@@ -3077,7 +3079,8 @@
             "uuid": "26c72fd7-d5b9-497b-be5e-cdfe9715ddac",
             "muscles": [
                 2,
-                9
+                9,
+                17
             ],
             "license": 1,
             "name": "Upright row, on multi press"
@@ -3099,7 +3102,9 @@
             "category": 13,
             "uuid": "5345766a-c092-457a-aa21-8ee6ffa855d4",
             "muscles": [
-                2
+                2,
+                17,
+                19
             ],
             "license": 1,
             "name": "Lateral raises"
@@ -4640,10 +4645,7 @@
             "category": 13,
             "uuid": "89e6d2ea-9a17-4a77-9a52-d5bcf39d57fd",
             "muscles": [
-                2,
-                19,
-                17,
-                20
+                2
             ],
             "license": 1,
             "name": "Military Press"
@@ -4793,7 +4795,9 @@
             "creation_date": "2014-03-30",
             "category": 13,
             "uuid": "69f271a6-5408-49d9-8a3a-1f6088835f30",
-            "muscles": [],
+            "muscles": [
+                19
+            ],
             "license": 1,
             "name": "Rear Delt Raises"
         },
@@ -5299,10 +5303,7 @@
             "category": 13,
             "uuid": "a7e15f4f-a7e6-4c0c-9bcb-ef3de90201aa",
             "muscles": [
-                2,
-                19,
-                17,
-                20
+                2
             ],
             "license": 1,
             "name": "Cable External Rotation"
@@ -5664,7 +5665,8 @@
             "muscles": [
                 1,
                 11,
-                13
+                13,
+                20
             ],
             "license": 1,
             "name": "farmers walks"
@@ -6095,7 +6097,8 @@
             "uuid": "7738fb4e-8f17-4aeb-84ef-2ee3e12eaff7",
             "muscles": [
                 1,
-                13
+                13,
+                20
             ],
             "license": 2,
             "name": "Z Curls"
@@ -6118,7 +6121,8 @@
             "uuid": "aba7ba7a-6ff0-47d4-ab66-8952e21e38c5",
             "muscles": [
                 2,
-                9
+                9,
+                19
             ],
             "license": 2,
             "name": "Lateral-to-Front Raises"
@@ -6152,10 +6156,7 @@
                 6,
                 3,
                 15,
-                5,
-                19,
-                17,
-                20
+                5
             ],
             "license": 2,
             "name": "Bear Walk"
@@ -6223,7 +6224,8 @@
             "uuid": "97d7eba2-681f-4b14-8e78-7d9b5865d336",
             "muscles": [
                 2,
-                9
+                9,
+                17
             ],
             "license": 2,
             "name": "Upright Row w/ Dumbbells"
@@ -6316,7 +6318,9 @@
             "creation_date": "2015-03-07",
             "category": 8,
             "uuid": "1ec5352f-41da-408b-8e6c-3fef79475847",
-            "muscles": [],
+            "muscles": [
+                20
+            ],
             "license": 2,
             "name": "Hand Grip"
         },
@@ -6345,8 +6349,7 @@
                 2,
                 8,
                 14,
-                3,
-                20
+                3
             ],
             "license": 2,
             "name": "Turkish Get-Up"
@@ -6427,10 +6430,7 @@
             "category": 10,
             "uuid": "392a531f-f0d6-4f65-b890-63776fc6b053",
             "muscles": [
-                2,
-                19,
-                17,
-                20
+                2
             ],
             "license": 3,
             "name": "Decline Press Sit-Up"
