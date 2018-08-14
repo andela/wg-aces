@@ -53,6 +53,7 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, CreateOnlyPermission)
+    http_method_names = ['get', 'options', 'head']
     ordering_fields = '__all__'
     filter_fields = ('category',
                      'creation_date',
