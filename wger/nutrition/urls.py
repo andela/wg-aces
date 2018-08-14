@@ -72,6 +72,9 @@ patterns_meal = [
     url(r'^(?P<id>\d+)/delete/$',
         meal.delete_meal,
         name='delete'),
+    url(r'^(?P<plan_pk>\d+)/meal/add_edit/$',
+        meal.add_meal,
+        name='add_edit')
 ]
 
 
