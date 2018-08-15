@@ -189,6 +189,9 @@ def add(request, pk):
             for instance in instances:
                 if not instance.weight:
                     instance.weight = 0
+                session = WorkoutSession.objects.get(user=request.user,
+                                                     date=log_date)
+                instance.session = session
                 instance.user = request.user
                 instance.workout = day.training
                 instance.date = log_date
