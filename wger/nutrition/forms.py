@@ -25,7 +25,7 @@ from wger.nutrition.models import (
     Ingredient,
     MealItem
 )
-from wger.utils.widgets import Html5NumberInput
+from wger.utils.widgets import Html5NumberInput, Html5TimeInput
 
 
 logger = logging.getLogger(__name__)
@@ -150,3 +150,19 @@ class MealItemForm(forms.ModelForm):
             self.fields['weight_unit'].queryset = \
                 IngredientWeightUnit.objects.filter(
                     ingredient_id=ingredient_id)
+
+
+class ChoiceFieldCustom(forms.ChoiceField):
+    def validate(self, value):
+        pass
+
+
+class MealCreateForm(forms.Form):
+    ingredient = forms.CharField()
+    time = forms.TimeField(widget=Html5TimeInput(), label=' Time ')
+    weight_unit = ChoiceFieldCustom(
+        choices=IngredientWeightUnit.objects.none(),
+        required=False)
+    amount = forms.DecimalField(decimal_places=2,
+                                max_digits=6, label='Amount',
+                                widget=Html5NumberInput())

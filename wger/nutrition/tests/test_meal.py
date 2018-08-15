@@ -21,10 +21,9 @@ from wger.core.tests import api_base_test
 from wger.core.tests.base_testcase import (
     WorkoutManagerTestCase,
     WorkoutManagerEditTestCase,
-    WorkoutManagerAddTestCase
+    WorkoutManagerAddTestCase,
 )
-from wger.nutrition.models import Meal
-from wger.nutrition.models import NutritionPlan
+from wger.nutrition.models import Meal, NutritionPlan, MealItem
 
 
 class MealRepresentationTestCase(WorkoutManagerTestCase):
@@ -60,6 +59,35 @@ class AddMealTestCase(WorkoutManagerAddTestCase):
     data = {'time': datetime.time(9, 2)}
     user_success = 'test'
     user_fail = 'admin'
+
+
+class AddMealAndItemTestCase(WorkoutManagerTestCase):
+    """
+    Tests adding a meal and meal item at once
+    """
+    def setUp(self):
+        super(AddMealAndItemTestCase, self).setUp()
+        self.user_login('admin')
+        self.url = reverse('nutrition:meal:add_edit', kwargs={'plan_pk': 4})
+        self.form = {"time": datetime.time(23, 2),
+                     "amount": 940,
+                     "ingredient": "Test ingredient 1",
+                     "weight_unit": 3}
+
+    def test_it_loads(self):
+        """
+        Test that it loads add meal modal
+        """
+        response = self.client.get(self.url)
+        self.assertIn(b"Ingredient name", response.content)
+
+    def test_add_meal_item(self):
+        """
+        Test that it redirects after adding meal item
+        """
+        self.client.post(self.url, self.form)
+        meal = MealItem.objects.filter(amount=940)
+        self.assertEqual(len(meal), 1)
 
 
 class PlanOverviewTestCase(WorkoutManagerTestCase):
