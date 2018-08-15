@@ -68,7 +68,7 @@
     <td>
         {% if not current_user.perms.manage_gym and not current_user.perms.manage_gyms %}
         {% if current_user.obj.is_active %}
-        <a href="{% url 'core:user:deactivate' current_user.obj.pk %}" style="color:#ffcc00">Deactivate</a>
+        <a href="{% url 'core:user:deactivate' current_user.obj.pk %}" style="color:rgb(206, 20, 20)">Deactivate</a>
         {% else %}
         <a href="{% url 'core:user:activate' current_user.obj.pk %}" style="color:#00e64d">Activate</a>
         {% endif %}
