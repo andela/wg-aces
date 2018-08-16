@@ -19,6 +19,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from wger.core.models import (
     UserProfile,
@@ -33,10 +34,32 @@ from wger.core.api.serializers import (
     DaysOfWeekSerializer,
     LicenseSerializer,
     RepetitionUnitSerializer,
-    WeightUnitSerializer
+    WeightUnitSerializer,
+    UserSerializer
 )
 from wger.core.api.serializers import UserprofileSerializer
-from wger.utils.permissions import UpdateOnlyPermission, WgerPermission
+from wger.utils.permissions import UpdateOnlyPermission,\
+    WgerPermission, CreateApiOnlyPermission
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    '''
+    API endpoint for create users
+    '''
+    is_private = True
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly, CreateApiOnlyPermission)
+    serializer_class = UserSerializer
+    ordering_fields = '__all__'
+
+    def perform_create(self, serializer):
+        '''
+        Set author and status
+        '''
+        obj = serializer.save()
+        user_api = obj.userapi
+        user_api.creating_user_id = self.request.user.id
+        user_api.save()
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):

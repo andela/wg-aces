@@ -460,7 +460,30 @@ def api_key(request):
         # Redirect to get rid of the GET parameter
         return HttpResponseRedirect(reverse('core:user:api-key'))
 
+    user = User.objects.get(id=request.user.id)
+    user_profile = user.userprofile
+
     context['token'] = token
+    context['access'] = user_profile.create_users_api
+
+    return render(request, 'user/api_key.html', context)
+
+
+@login_required
+def grant_access(request):
+    '''
+    Allows the user to create users through api
+    '''
+    context = {}
+    context.update(csrf(request))
+
+    user = User.objects.get(id=request.user.id)
+    user_profile = user.userprofile
+
+    if (user_profile.create_users_api == -1):
+        user_profile.create_users_api = 0
+        user_profile.save()
+    context['access'] = user_profile.create_users_api
 
     return render(request, 'user/api_key.html', context)
 

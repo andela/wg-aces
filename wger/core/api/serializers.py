@@ -25,6 +25,14 @@ from wger.core.models import (
     RepetitionUnit,
     WeightUnit)
 
+from django.contrib.auth.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """User Serializer"""
+    class Meta:
+        model = User
+
 
 class UserprofileSerializer(serializers.ModelSerializer):
     '''

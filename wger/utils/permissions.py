@@ -83,3 +83,19 @@ class UpdateOnlyPermission(permissions.BasePermission):
         return (request.user and
                 request.user.is_authenticated() and
                 request.method in ['GET', 'HEAD', 'OPTIONS', 'PATCH'])
+
+
+class CreateApiOnlyPermission(permissions.BasePermission):
+    '''
+    Custom permission that permits read access the resource but limits the
+    write operations to creating (POSTing) new objects only and does not
+    allow allow editing them. This is currently used for exercises and their
+    images.
+    '''
+
+    def has_permission(self, request, view):
+        return (request.method in ['GET', 'HEAD', 'OPTIONS'] or
+                (request.user and
+                 request.user.is_authenticated() and
+                 request.method == 'POST') and
+                request.user.userprofile.create_users_api == 1)

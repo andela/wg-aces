@@ -52,4 +52,17 @@ curl -X GET https://wger.de/api/v2/workout/ \
 <p>
     <a href="{% url 'software:api' %}" class="btn btn-block btn-default">{% trans 'Documentation' %}</a>
 </p>
+{% if access == -1%}
+<p>
+    <a href="{% url 'core:user:grant-access' %}" class="btn btn-block btn-default" rel="nofollow">Request for access to add user through api.</a>
+</p>
+{% endif %} {% if access == 1%}
+<p>
+    You have access to create users through the api.
+</p>
+{% endif %} {% if access == 0%}
+<p>
+    Pending request to gain access to create users through api.
+</p>
+{% endif %}
 {% endblock %}
