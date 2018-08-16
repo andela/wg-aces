@@ -207,13 +207,14 @@ class WeightLogOverviewAddTestCase(WorkoutManagerTestCase):
              'form-MAX-NUM_FORMS': 3
              })
         count_after = WorkoutLog.objects.count()
-
+        workoutlog = WorkoutLog.objects.all()[:1].get()
         # Logged out users get a 302 redirect to login page
         # Users not owning the workout, a 403, forbidden
         if fail:
             self.assertIn(response.status_code, (302, 403))
             self.assertEqual(count_before, count_after)
         else:
+            self.assertIsNotNone(workoutlog.session)
             self.assertEqual(response.status_code, 302)
             self.assertGreater(count_after, count_before)
 
