@@ -13,12 +13,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Workout Manager.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 from django.core.urlresolvers import reverse
 
 from wger.core.tests import api_base_test
 from wger.core.tests.base_testcase import WorkoutManagerAddTestCase
 from wger.core.tests.base_testcase import WorkoutManagerEditTestCase
-from wger.nutrition.models import MealItem
+from wger.core.tests.base_testcase import WorkoutManagerTestCase
+from wger.nutrition.models import MealItem, ActualMealItem
 
 
 class EditMealItemUnitTestCase(WorkoutManagerEditTestCase):
@@ -56,6 +59,50 @@ class AddMealItemUnitTestCase(WorkoutManagerAddTestCase):
     data = {'amount': 1,
             'ingredient': 1,
             'weight_unit': 1}
+
+
+class AddActualMealItemUnitTestCase(WorkoutManagerTestCase):
+    '''
+    Tests adding an actual meal eaten
+    '''
+    def setUp(self):
+        super(AddActualMealItemUnitTestCase, self).setUp()
+        self.user_login('admin')
+        self.meal_url = reverse('nutrition:meal:add_edit',
+                                kwargs={'plan_pk': 4})
+        self.meal_form = {"time": datetime.time(23, 2),
+                          "amount": 940,
+                          "ingredient": "Test ingredient 1",
+                          "weight_unit": 3}
+        self.client.post(self.meal_url, self.meal_form)
+        self.url = reverse('nutrition:meal_item:add_actual',
+                           kwargs={'meal_id': 4})
+        self.data = {'amount': 1,
+                     'ingredient': 1,
+                     'weight_unit': 1}
+        self.client.post(self.url, self.data)
+
+    def test_add_actual_meal(self):
+        """
+        Test that actual meal can be added
+        """
+        actual_meals = ActualMealItem.objects.all()
+        self.assertEqual(1, len(actual_meals))
+        self.assertEqual(actual_meals[0].id, 1)
+
+    def test_edit_actual_meal(self):
+        """
+        Test that existing actual can be edited
+        """
+        self.client.post(self.url, self.data)
+        url = reverse('nutrition:meal_item:edit_actual', kwargs={'pk': 3})
+        form = {'amount': 234,
+                'ingredient': 1,
+                'weight_unit': 1}
+        self.client.post(url, form)
+        actual_meals = ActualMealItem.objects.all()
+        single_actual = [act for act in actual_meals if act.id == 3]
+        self.assertEqual(234, single_actual[0].amount)
 
 
 class AddMealItemWeightTestCase(WorkoutManagerAddTestCase):
