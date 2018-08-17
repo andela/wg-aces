@@ -86,34 +86,101 @@ function wgerCustomModalInit()
                    title="{% trans 'Add' %}"
                    class="wger-modal-dialog edit-meal">
                     <span class="{% fa_class 'plus' %}"></span></a>
+                {% ifequal meal.actualmealitem_set.select_related.count 0 %}
+                    <a href="{% url  'nutrition:meal_item:add_actual' meal.id %}"
+                    class="wger-modal-dialog btn btn-default btn-block">Add actual meal</a>
+                {% endifequal %}
             </div>
             {% endif %}
         </td>
         {% endifchanged %}
         <td>
-            {% if item.get_unit_type == MEALITEM_WEIGHT_GRAM %}{{ item.amount|floatformat:"0" }}g
-            {% else %}
-                {{ item.amount|floatformat:"0" }} × {{ item.weight_unit.unit.name }}
-            {% endif %}
-            {{ item.ingredient.name }}
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#{{ item.ingredient.id }}">Planned meal</a></li>
+                {% for actual in meal.actualmealitem_set.select_related %}
+                    {% ifequal actual.meal_id meal.id%}
+                        <li><a data-toggle="tab" href="#actual{{ item.ingredient.id}}">Actual meal</a></li>
+                    {% endifequal %}
+                {%endfor%}
+            </ul>
+                
+            <div class="tab-content">
+                <div id="{{ item.ingredient.id }}" class="tab-pane fade in active">
+                        {% if item.get_unit_type == MEALITEM_WEIGHT_GRAM %}{{ item.amount|floatformat:"0" }}g
+                        {% else %}
+                            {{ item.amount|floatformat:"0" }} × {{ item.weight_unit.unit.name }}
+                        {% endif %}
+                        {{ item.ingredient.name }}
+            
+                        {% if is_owner %}
+                        <span class="editoptions">
+                            <a href="{% url 'nutrition:meal_item:delete' item.id %}"
+                               title="{% trans 'Delete' %}"
+                               class="delete-mealitem">
+                               <span class="{% fa_class 'trash' %}"></span></a>
+                            <a href="{% url 'nutrition:meal_item:edit' item.id %}"
+                               title="{% trans 'Edit' %}"
+                               class="wger-modal-dialog edit-meal edit-mealitem">
+                                <span class="{% fa_class 'pencil-square-o' %}"></span></a>
+                        </span>
+                        {% endif %}
+                </div>
+                {% for actual in meal.actualmealitem_set.select_related %}
+                    {% if actual.ingredient.name  %}
+                        <div id="actual{{ item.ingredient.id }}" class="tab-pane fade">
+                                {% if actual.get_unit_type == MEALITEM_WEIGHT_GRAM %}{{ actual.amount|floatformat:"0" }}g
+                                {% else %}
+                                    {{ actual.amount|floatformat:"0" }} × {{ actual.weight_unit.unit.name }}
+                                {% endif %}
+                                {{ actual.ingredient.name }}
+                                {% if is_owner %}
+                                <span class="editoptions">
+                                    <a href="{% url 'nutrition:meal_item:edit_actual' actual.id %}"
+                                    title="{% trans 'Edit' %}"
+                                    class="wger-modal-dialog edit-meal edit-mealitem">
+                                        <span class="{% fa_class 'pencil-square-o' %}"></span></a>
+                                </span>
+                                {% endif %}
 
-            {% if is_owner %}
-            <span class="editoptions">
-                <a href="{% url 'nutrition:meal_item:delete' item.id %}"
-                   title="{% trans 'Delete' %}"
-                   class="delete-mealitem">
-                   <span class="{% fa_class 'trash' %}"></span></a>
-                <a href="{% url 'nutrition:meal_item:edit' item.id %}"
-                   title="{% trans 'Edit' %}"
-                   class="wger-modal-dialog edit-meal edit-mealitem">
-                    <span class="{% fa_class 'pencil-square-o' %}"></span></a>
-            </span>
-            {% endif %}
-            </td>
+                                <div class="panel-group" id="accordion">
+                                        <div class="panel ">
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ item.ingredient.id }}">nutritional value</a>
+                                          <div id="collapse{{ item.ingredient.id }}" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr style="background: #E0E0E0;">
+                                                            <th class="align-right">{% trans "Energy" %}</th>
+                                                            <th class="align-right">{% trans "Protein" %}</th>
+                                                            <th class="align-right">{% trans "Carbohydrates" %}</th>
+                                                            <th class="align-right">{% trans "Fat" %}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="align-right">{{actual.get_nutritional_values.energy|floatformat}}</td>
+                                                            <td class="align-right">{{actual.get_nutritional_values.protein|floatformat}}</td>
+                                                            <td class="align-right">{{actual.get_nutritional_values.carbohydrates|floatformat}}</td>
+                                                            <td class="align-right">{{actual.get_nutritional_values.fat|floatformat}}</td>
+
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                          </div>
+                                        </div>
+                                </div>
+                        </div>
+                        
+                    {% endif %}
+                
+                </div>
+                </td>
+            {%endfor%}
             <td class="align-right">{{item.get_nutritional_values.energy|floatformat}}</td>
             <td class="align-right">{{item.get_nutritional_values.protein|floatformat}}</td>
             <td class="align-right">{{item.get_nutritional_values.carbohydrates|floatformat}}</td>
-            <td class="align-right">{{item.get_nutritional_values.fat|floatformat}}</td>
+            <td class="align-right">{{item.get_nutritional_values.fat|floatformat}}</td>         
 </tr>
     {% empty %}
     {% if is_owner %}

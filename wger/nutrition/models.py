@@ -601,12 +601,132 @@ class MealItem(models.Model):
     meal = models.ForeignKey(Meal,
                              verbose_name=_('Nutrition plan'),
                              editable=False)
-    ingredient = models.ForeignKey(Ingredient, verbose_name=_('Ingredient'))
+    ingredient = models.ForeignKey(Ingredient,
+                                   verbose_name=_('Ingredient'))
+
     weight_unit = models.ForeignKey(IngredientWeightUnit,
                                     verbose_name=_('Weight unit'),
                                     null=True,
                                     blank=True,
                                     )
+
+    order = models.IntegerField(verbose_name=_('Order'),
+                                blank=True,
+                                editable=False)
+    amount = models.DecimalField(decimal_places=2,
+                                 max_digits=6,
+                                 verbose_name=_('Amount'),
+                                 validators=[MinValueValidator(1),
+                                             MaxValueValidator(1000)])
+
+    def __str__(self):
+        '''
+        Return a more human-readable representation
+        '''
+        return u"{0}g ingredient {1}".format(self.amount, self.ingredient_id)
+
+    def get_owner_object(self):
+        '''
+        Returns the object that has owner information
+        '''
+        return self.meal.plan
+
+    def get_unit_type(self):
+        '''
+        Returns the type of unit used:
+        - a value in grams
+        - a 'human' unit like 'a cup' or 'a slice'
+        '''
+
+        if self.weight_unit:
+            return MEALITEM_WEIGHT_UNIT
+        else:
+            return MEALITEM_WEIGHT_GRAM
+
+    def get_nutritional_values(self, use_metric=True):
+        '''
+        Sums the nutrional info for the ingredient in the MealItem
+
+        :param use_metric Flag that controls the units used
+        '''
+        nutritional_info = {'energy': 0,
+                            'protein': 0,
+                            'carbohydrates': 0,
+                            'carbohydrates_sugar': 0,
+                            'fat': 0,
+                            'fat_saturated': 0,
+                            'fibres': 0,
+                            'sodium': 0}
+        # Calculate the base weight of the item
+        if self.get_unit_type() == MEALITEM_WEIGHT_GRAM:
+            item_weight = self.amount
+        else:
+            item_weight = (self.amount *
+                           self.weight_unit.amount *
+                           self.weight_unit.gram)
+
+        nutritional_info['energy'] +=\
+            self.ingredient.energy * item_weight / 100
+        nutritional_info['protein'] +=\
+            self.ingredient.protein * item_weight / 100
+        nutritional_info['carbohydrates'] +=\
+            self.ingredient.carbohydrates * item_weight / 100
+
+        if self.ingredient.carbohydrates_sugar:
+            nutritional_info['carbohydrates_sugar'] +=\
+                self.ingredient.carbohydrates_sugar \
+                * item_weight / 100
+
+        nutritional_info['fat'] += self.ingredient.fat * item_weight / 100
+
+        if self.ingredient.fat_saturated:
+            nutritional_info['fat_saturated'] +=\
+                self.ingredient.fat_saturated * item_weight / 100
+
+        if self.ingredient.fibres:
+            nutritional_info['fibres'] +=\
+                self.ingredient.fibres * item_weight / 100
+
+        if self.ingredient.sodium:
+            nutritional_info['sodium'] +=\
+                self.ingredient.sodium * item_weight / 100
+
+        # If necessary, convert weight units
+        if not use_metric:
+            for key, value in nutritional_info.items():
+
+                # Energy is not a weight!
+                if key == 'energy':
+                    continue
+
+                # Everything else, to ounces
+                nutritional_info[key] = AbstractWeight(value, 'g').oz
+
+        # Only 2 decimal places, anything else doesn't make sense
+        for i in nutritional_info:
+            nutritional_info[i] = Decimal(nutritional_info[i]).quantize(
+                TWOPLACES)
+
+        return nutritional_info
+
+
+@python_2_unicode_compatible
+class ActualMealItem(models.Model):
+    '''
+    An item (component) of a meal
+    '''
+
+    meal = models.ForeignKey(Meal,
+                             verbose_name=_('Meal item'),
+                             editable=False)
+    ingredient = models.ForeignKey(Ingredient,
+                                   verbose_name=_('Actual Ingredient'),
+                                   null=True,
+                                   blank=True,)
+    weight_unit = models.ForeignKey(IngredientWeightUnit,
+                                    verbose_name=_('Weight unit'),
+                                    null=True,
+                                    blank=True,)
 
     order = models.IntegerField(verbose_name=_('Order'),
                                 blank=True,

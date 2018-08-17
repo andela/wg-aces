@@ -22,8 +22,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext_lazy
 from django.views.generic import CreateView, UpdateView
 
-from wger.nutrition.forms import MealItemForm
-from wger.nutrition.models import Meal, MealItem
+from wger.nutrition.forms import MealItemForm, ActualMealItemForm
+from wger.nutrition.models import Meal, MealItem, ActualMealItem
 from wger.utils.generic_views import WgerFormMixin
 
 
@@ -95,12 +95,12 @@ class MealItemCreateView(WgerFormMixin, CreateView):
 
 class MealItemEditView(WgerFormMixin, UpdateView):
     '''
-    Generic view to update an existing meal item
+    Generic view to update an existing planned meal item
     '''
 
     model = MealItem
     form_class = MealItemForm
-    title = ugettext_lazy('Edit meal item')
+    title = ugettext_lazy('Edit planned meal item')
     form_action_urlname = 'nutrition:meal_item:edit'
     template_name = 'meal_item/edit.html'
 
@@ -113,5 +113,74 @@ class MealItemEditView(WgerFormMixin, UpdateView):
         Send some additional data to the template
         '''
         context = super(MealItemEditView, self).get_context_data(**kwargs)
+        context['ingredient_searchfield'] = self.object.ingredient.name
+        return context
+
+
+class ActualMealItemAddView(WgerFormMixin, CreateView):
+    '''
+    Generic view to create a new meal item
+    '''
+
+    model = ActualMealItem
+    form_class = ActualMealItemForm
+    template_name = 'meal_item/edit.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        '''
+        Check that the user owns the meal
+        '''
+        meal = get_object_or_404(Meal, pk=kwargs['meal_id'])
+        if meal.plan.user == request.user:
+            self.meal = meal
+            return super(ActualMealItemAddView, self).dispatch(
+                request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def get_success_url(self):
+        return reverse('nutrition:plan:view', kwargs={'id': self.meal.plan.id})
+
+    def get_context_data(self, **kwargs):
+        '''
+        Send some additional data to the template
+        '''
+        context = super(ActualMealItemAddView, self).get_context_data(**kwargs)
+        context['form_action'] = reverse('nutrition:meal_item:add_actual',
+                                         kwargs={'meal_id': self.meal.id})
+        context['ingredient_searchfield'] = self.request.POST.get(
+            'ingredient_searchfield', '')
+        return context
+
+    def form_valid(self, form):
+        '''
+        Manually set the corresponding meal
+        '''
+        form.instance.meal = self.meal
+        form.instance.order = 1
+        return super(ActualMealItemAddView, self).form_valid(form)
+
+
+class ActualMealItemEditView(WgerFormMixin, UpdateView):
+    '''
+    Generic view to update an actual meal item
+    '''
+
+    model = ActualMealItem
+    form_class = ActualMealItemForm
+    title = ugettext_lazy('Edit actual meal item')
+    form_action_urlname = 'nutrition:meal_item:edit_actual'
+    template_name = 'meal_item/edit.html'
+
+    def get_success_url(self):
+        return reverse('nutrition:plan:view',
+                       kwargs={'id': self.object.meal.plan.id})
+
+    def get_context_data(self, **kwargs):
+        '''
+        Send some additional data to the template
+        '''
+        context = super(ActualMealItemEditView, self).get_context_data(
+            **kwargs)
         context['ingredient_searchfield'] = self.object.ingredient.name
         return context
