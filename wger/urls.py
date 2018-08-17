@@ -100,6 +100,8 @@ router.register(r'workoutlog', manager_api_views.WorkoutLogViewSet,
                 base_name='workoutlog')
 
 # Core app
+router.register(r'user', core_api_views.UserViewSet,
+                base_name='user')
 router.register(r'userprofile', core_api_views.UserProfileViewSet,
                 base_name='userprofile')
 router.register(r'language', core_api_views.LanguageViewSet,

@@ -79,6 +79,46 @@ class Language(models.Model):
 
 
 @python_2_unicode_compatible
+class UserApi(models.Model):
+    '''
+    Language of an item (exercise, workout, etc.)
+    '''
+
+    user = models.OneToOneField(User,
+                                editable=False)
+    '''
+    The user
+    '''
+    creating_user_id = IntegerField(
+        verbose_name=_('Id for user creating '),
+        help_text=_('Id of the user creating another user\
+         through the application'),
+        default=1,
+        validators=[MinValueValidator(1)])
+
+    api_created_flag = models.BooleanField(default=True,
+                                           editable=False)
+    '''
+    Flag to user  is created from api
+    '''
+
+    class Meta:
+        '''
+        Set Meta options
+        '''
+        ordering = ["pk", ]
+
+    #
+    # Django methods
+    #
+    def __str__(self):
+        '''
+        Return a more human-readable representation
+        '''
+        return u"Api created user user {0}".format(self.user)
+
+
+@python_2_unicode_compatible
 class UserProfile(models.Model):
     GENDER_MALE = '1'
     GENDER_FEMALE = '2'
@@ -240,6 +280,14 @@ by the US Department of Agriculture. It is extremely complete, with around
         validators=[MinValueValidator(4),
                     MaxValueValidator(10)])
     '''The average hours of sleep per day'''
+
+    create_users_api = models.IntegerField(
+        verbose_name=_('Allow external creation of users'),
+        help_text=_('Allow external creation of users through the api'),
+        validators=[MinValueValidator(-1),
+                    MaxValueValidator(1)],
+        default=-1)
+    '''Allow creation of user through api'''
 
     work_hours = IntegerField(verbose_name=_('Work'),
                               help_text=_('Average hours per day'),

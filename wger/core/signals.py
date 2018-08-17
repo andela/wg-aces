@@ -18,7 +18,7 @@
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
-from wger.core.models import UserProfile, UserCache
+from wger.core.models import UserProfile, UserCache, UserApi
 from wger.utils.helpers import disable_for_loaddata
 
 
@@ -32,6 +32,15 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 @disable_for_loaddata
+def create_user_api(sender, instance, created, **kwargs):
+    '''
+    Every new user is created through the api and useraoi object is created
+    '''
+    if created:
+        UserApi.objects.create(user=instance)
+
+
+@disable_for_loaddata
 def create_user_cache(sender, instance, created, **kwargs):
     '''
     Every new user gets a cache table
@@ -41,4 +50,5 @@ def create_user_cache(sender, instance, created, **kwargs):
 
 
 post_save.connect(create_user_profile, sender=User)
+post_save.connect(create_user_api, sender=User)
 post_save.connect(create_user_cache, sender=User)
