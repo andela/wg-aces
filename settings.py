@@ -59,7 +59,9 @@ ALLOWED_HOSTS = '*'
 
 # Configure a real backend in production
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = os.environ.get(
+                            'EMAIL_BACKEND',
+                            'django.core.mail.backends.console.EmailBackend')
 
 # Sender address used for sent emails
 WGER_SETTINGS['EMAIL_FROM'] = 'wger Workout Manager <wger@example.com>'  # noqa E405

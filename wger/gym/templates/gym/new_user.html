@@ -24,7 +24,7 @@
     </tr>
     <tr>
         <th>{% trans "Password" %}</th>
-        <td>{{password}}</td>
+        <td>-- Sent to user's email --</td>
     </tr>
     <tr>
         <th>{% trans "Email" %}</th>
@@ -38,19 +38,9 @@
 {% endblock %}
 
 
-
-
 {% block sidebar %}
 <h4>{% trans "Info" %}</h4>
 <p>
-    {% blocktrans %}Please write down the user password or save the exported
-file, which contains all the user data, and keep it in a safe place. The password
-cannot be recovered later.{% endblocktrans %}
-</p>
-
-<p>
-    <a href="{% url 'gym:gym:new-user-data-export' %}" {% auto_link_css flavour %}>
-        {% trans "Export user data" %}
-    </a>
+    {% blocktrans %}The new user can now check their email to access their credentials {% endblocktrans %}
 </p>
 {% endblock %}

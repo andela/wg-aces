@@ -16,7 +16,11 @@
 
 from django.contrib.auth.models import User
 from django import forms
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
+from django.core import mail
+from django.conf import settings
+from django.template.loader import render_to_string
 
 from wger.core.forms import UserPersonalInformationForm
 from wger.utils.widgets import BootstrapSelectMultiple
@@ -93,3 +97,27 @@ class GymUserAddForm(GymUserPermisssionForm, UserPersonalInformationForm):
             return username
         raise forms.ValidationError(_(
             "A user with that username already exists."))
+
+    def send_email(self, request, user, gym):
+        '''
+        Sends an email with password after new user has been
+        successfully added to a gym
+        '''
+        subject = _(
+            'You have been added to a gym: {0}'.format(gym.name))
+
+        url = request.build_absolute_uri(reverse('core:user:login'))
+        pass_key = request.session['gym.user']['password']
+
+        context = {
+            'gym': gym,
+            'username': user.username,
+            'pass_key': pass_key,
+            'url': url
+        }
+        message = render_to_string('gym/new_gym_member.tpl', context)
+        mail.send_mail(subject,
+                       message,
+                       settings.WGER_SETTINGS['EMAIL_FROM'],
+                       [user.email],
+                       fail_silently=True)
