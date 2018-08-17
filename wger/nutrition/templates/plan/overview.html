@@ -6,6 +6,8 @@
 
 
 {% block content %}
+
+
 <div class="list-group">
     {% for plan in plans %}
         <a href="{{ plan.get_absolute_url }}" class="list-group-item">
@@ -15,6 +17,7 @@
             <p class="list-group-item-text">
                 {{ plan.creation_date }} –
                 {{ plan.get_nutritional_values.total.energy|floatformat }} {% trans "kcal" %}
+
             </p>
         </a>
     {% empty %}
@@ -24,6 +27,8 @@
         </a>
     {% endfor %}
 </div>
+
+
 {% endblock %}
 
 
