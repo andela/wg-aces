@@ -125,7 +125,6 @@ class ExerciseAcceptTestCase(WorkoutManagerTestCase):
         exercise = Exercise.objects.get(pk=4)
 
         self.assertEqual(response.status_code, 302)
-
         if not fail:
             self.assertEqual(exercise.status, Exercise.STATUS_ACCEPTED)
             response = self.client.get(response['Location'])

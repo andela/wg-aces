@@ -25,6 +25,7 @@ from django.forms import (
     ModelChoiceField,
     ModelMultipleChoiceField
 )
+from django import forms
 from django.core.cache import cache
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import (PermissionRequiredMixin,
@@ -187,6 +188,12 @@ class ExercisesEditAddView(WgerFormMixin):
                 widget=TranslatedOriginalSelectMultiple(),
                 required=False)
 
+            license_author = forms.CharField(
+                label="Author", help_text=_(
+                    'If you are not the author, enter the name or '
+                    'source here. This is needed for some licenses '
+                    'e.g. the CC-BY-SA.'), required=False)
+
             class Meta:
                 model = Exercise
                 widgets = {'equipment': TranslatedSelectMultiple()}
@@ -197,7 +204,7 @@ class ExercisesEditAddView(WgerFormMixin):
                           'muscles_secondary',
                           'equipment',
                           'license',
-                          'license_author']
+                          ]
 
             class Media:
                 js = ('/static/bower_components/tinymce/tinymce.min.js',)

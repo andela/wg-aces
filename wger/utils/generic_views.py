@@ -245,7 +245,6 @@ class WgerFormMixin(ModelFormMixin):
 
         if self.get_messages():
             messages.success(self.request, self.get_messages())
-
         return super(WgerFormMixin, self).form_valid(form)
 
 

@@ -74,7 +74,7 @@ class EditIngredientTestCase(WorkoutManagerEditTestCase):
             'protein': 20,
             'carbohydrates': 10,
             'license': 2,
-            'license_author': 'me!'}
+            'license_author': 1}
 
     def post_test_hook(self):
         '''
@@ -102,8 +102,7 @@ class AddIngredientTestCase(WorkoutManagerAddTestCase):
             'fibres': 2.1,
             'protein': 20,
             'carbohydrates': 10,
-            'license': 2,
-            'license_author': 'me!'}
+            'license': 2}
 
     def post_test_hook(self):
         '''
@@ -342,6 +341,7 @@ class IngredientTestCase(WorkoutManagerTestCase):
         ingredient.carbohydrates = 12
         ingredient.fat = Decimal('0.1')
         ingredient.language_id = 1
+        ingredient.license_author_id = 1
         self.assertFalse(ingredient.full_clean())
 
         # Values wrong
