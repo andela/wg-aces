@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 from django.core.cache import cache
 
-from wger.nutrition.models import NutritionPlan, Meal, MealItem
+from wger.nutrition.models import NutritionPlan
 from wger.utils.cache import cache_mapper
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
 
@@ -22,14 +22,17 @@ class NutritionPlanCacheTestCase(WorkoutManagerTestCase):
     '''
     Test case for the NutritionalPlan canonical representation
     '''
+
     def test_nutritional_plan_canonical_form_cache(self):
         '''
         Test that the nuttritional plan cache is correctly generated
         '''
-        self.assertFalse(cache.get(cache_mapper.get_nutritional_plan_canonical(1)))
+        self.assertFalse(cache.get
+                         (cache_mapper.get_nutritional_plan_canonical(1)))
         nutritional_plan = NutritionPlan.objects.get(pk=1)
         nutritional_plan.get_nutritional_values()
-        self.assertTrue(cache.get(cache_mapper.get_nutritional_plan_canonical(1)))
+        self.assertTrue(cache.get
+                        (cache_mapper.get_nutritional_plan_canonical(1)))
 
     def test_nutritional_plan_canonical_form_cache_save(self):
         '''
@@ -37,10 +40,12 @@ class NutritionPlanCacheTestCase(WorkoutManagerTestCase):
         '''
         nutritional_plan = NutritionPlan.objects.get(pk=1)
         nutritional_plan.get_nutritional_values()
-        self.assertTrue(cache.get(cache_mapper.get_nutritional_plan_canonical(1)))
+        self.assertTrue(cache.get
+                        (cache_mapper.get_nutritional_plan_canonical(1)))
 
         nutritional_plan.save()
-        self.assertFalse(cache.get(cache_mapper.get_nutritional_plan_canonical(1)))
+        self.assertFalse(cache.get
+                         (cache_mapper.get_nutritional_plan_canonical(1)))
 
     def test_nutritional_plan_canonical_form_cache_delete(self):
         '''
@@ -48,7 +53,8 @@ class NutritionPlanCacheTestCase(WorkoutManagerTestCase):
         '''
         nutritional_plan = NutritionPlan.objects.get(pk=1)
         nutritional_plan.get_nutritional_values()
-        self.assertTrue(cache.get(cache_mapper.get_nutritional_plan_canonical(1)))
+        self.assertTrue(cache.get
+                        (cache_mapper.get_nutritional_plan_canonical(1)))
 
         nutritional_plan.delete()
         self.assertFalse(cache.get(cache_mapper.get_workout_canonical(1)))

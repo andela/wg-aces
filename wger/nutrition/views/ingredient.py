@@ -34,6 +34,7 @@ from django.views.generic import (
 
 from wger.nutrition.forms import UnitChooserForm
 from wger.nutrition.models import Ingredient
+from wger.core.models import LicenseAuthor
 from wger.utils.generic_views import (
     WgerFormMixin,
     WgerDeleteMixin
@@ -41,6 +42,7 @@ from wger.utils.generic_views import (
 from wger.utils.constants import PAGINATION_OBJECTS_PER_PAGE
 from wger.utils.language import load_language, load_ingredient_languages
 from wger.utils.cache import cache_mapper
+from django import forms
 
 
 logger = logging.getLogger(__name__)
@@ -135,17 +137,38 @@ class IngredientMixin(WgerFormMixin):
     Manually set the order of the fields
     '''
 
-    fields = ['name',
-              'energy',
-              'protein',
-              'carbohydrates',
-              'carbohydrates_sugar',
-              'fat',
-              'fat_saturated',
-              'fibres',
-              'sodium',
-              'license',
-              'license_author']
+    def get_form_class(self):
+
+        # Define the exercise form here because only at this point
+        # during the request have we access to the currently used language.
+        # In other places Django defaults
+        # to 'en-us'.
+        class IngredientForm(forms.ModelForm):
+
+            license_author = forms.CharField(
+                label="Author", help_text=_(
+                    'If you are not the author, enter the name or '
+                    'source here. This is needed for some licenses '
+                    'e.g. the CC-BY-SA.'), required=False)
+
+            class Meta:
+                model = Ingredient
+                fields = ['name',
+                          'energy',
+                          'protein',
+                          'carbohydrates',
+                          'carbohydrates_sugar',
+                          'fat',
+                          'fat_saturated',
+                          'fibres',
+                          'sodium',
+                          'license',
+                          ]
+
+            class Media:
+                js = ('/static/bower_components/tinymce/tinymce.min.js',)
+
+        return IngredientForm
 
 
 class IngredientEditView(IngredientMixin, LoginRequiredMixin,
@@ -193,6 +216,16 @@ class IngredientCreateView(IngredientMixin, CreateView):
                              fail_silently=True)
 
         form.instance.language = load_language()
+        author_name = self.request.POST.get('license_author')
+        if author_name:
+            if author_name.strip() != '':
+                author, created = LicenseAuthor.objects.get_or_create(
+                    author_name=author_name)
+                author_obj = LicenseAuthor.objects.get(id=author.id)
+                self.license_author_id = author.id
+                form.instance.license_author = author_obj
+
+        # print(self.license_author_id)
         return super(IngredientCreateView, self).form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):

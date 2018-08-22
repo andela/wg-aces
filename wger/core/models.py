@@ -720,3 +720,42 @@ class WeightUnit(models.Model):
         This is done basically to not litter the code with magic IDs
         '''
         return self.id in (1, 2)
+
+
+@python_2_unicode_compatible
+class LicenseAuthor(models.Model):
+    '''
+    License for an item (exercise, ingredient, etc.)
+    '''
+
+    author_name = models.CharField(
+        max_length=60,
+        verbose_name=_('Author Name'),
+        help_text=_('If you are not the author, enter the name or '
+                    'source here. This is needed for some licenses '
+                    'e.g. the CC-BY-SA.'))
+    '''Author Name'''
+
+    class Meta:
+        '''
+        Set Meta options
+        '''
+        ordering = ["author_name", ]
+
+    #
+    # Django methods
+    #
+    def __str__(self):
+        '''
+        Return a more human-readable representation
+        '''
+        return self.author_name
+
+    #
+    # Own methods
+    #
+    def get_owner_object(self):
+        '''
+        License has no owner information
+        '''
+        return None
