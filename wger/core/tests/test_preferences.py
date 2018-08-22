@@ -73,7 +73,7 @@ class PreferencesTestCase(WorkoutManagerTestCase):
         response = self.client.post(reverse('core:user:preferences'),
                                     {'show_comments': False,
                                      'show_english_ingredients': True,
-                                     'email': '',
+                                     'email': 'another-email@example.com',
                                      'workout_reminder_active': True,
                                      'workout_reminder': 22,
                                      'workout_duration': 10,
@@ -88,7 +88,8 @@ class PreferencesTestCase(WorkoutManagerTestCase):
         profile = response.context['user'].userprofile
         self.assertFalse(profile.show_comments)
         self.assertTrue(profile.show_english_ingredients)
-        self.assertEqual(response.context['user'].email, '')
+        self.assertEqual(response.context['user'].email,
+                         'another-email@example.com')
 
     def test_address(self):
         '''

@@ -58,9 +58,9 @@ class UserPreferencesForm(forms.ModelForm):
 class UserEmailForm(forms.ModelForm):
     email = EmailField(
         label=_("Email"),
-        help_text=_("Used for password resets and,\
-                       optionally, email reminders."),
-        required=False)
+        help_text=_("Used to set and reset passwords and\
+                       optionally, set email reminders."),
+        required=True)
 
     class Meta:
         model = User

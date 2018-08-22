@@ -392,8 +392,9 @@ class GymAddUserView(WgerFormMixin,
         if 'manager' in form.cleaned_data['role']:
             user.groups.add(Group.objects.get(name='general_gym_manager'))
 
-        self.request.session['gym.user'] = {'user_pk': user.pk,
-                                            'password': password}
+        request = self.request
+        request.session['gym.user'] = {'user_pk': user.pk,
+                                       'password': password}
 
         # Create config
         if is_any_gym_admin(user):
@@ -404,6 +405,8 @@ class GymAddUserView(WgerFormMixin,
         config.user = user
         config.gym = gym
         config.save()
+
+        form.send_email(request, user, gym)
 
         return super(GymAddUserView, self).form_valid(form)
 
