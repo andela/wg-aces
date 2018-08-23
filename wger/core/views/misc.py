@@ -132,7 +132,8 @@ def dashboard(request):
                                     used_days[week.id], True))
 
         if not day_has_workout:
-            week_day_result.append((_(week.day_of_week), _('Rest day'), False))
+            week_day_result.append((_(week.day_of_week), _(
+                'Rest {0}'.format(get_label(week.training_cycle))), False))
 
     template_data['weekdays'] = week_day_result
 
@@ -142,6 +143,15 @@ def dashboard(request):
         template_data['nutritional_info'] = plan.get_nutritional_values()
 
     return render(request, 'index.html', template_data)
+
+
+def get_label(cycle):
+    labels = {
+        'Micro': 'day',
+        'Meso': 'week',
+        'Macro': 'month'
+    }
+    return labels.get(cycle, 'day')
 
 
 class ContactClassView(TemplateView):

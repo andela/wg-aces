@@ -78,6 +78,41 @@ class DayView(WgerFormMixin, LoginRequiredMixin):
 
         return form
 
+    def get_cycle(self, key):
+        labels = {
+            'microcyle': 'day',
+            'mesocycle': 'week',
+            'macrocycle': 'month'
+        }
+        return labels.get(key, 'day')
+
+    def get_day_key(self, key):
+        keys = {
+            'microcyle': 'Micro',
+            'mesocycle': 'Meso',
+            'macrocycle': 'Macro'
+        }
+        return keys.get(key, 'Micro')
+
+    def set_context(self, context, workout):
+        used_days = []
+        for day in workout.day_set.all():
+            for weekday in day.day.all():
+                if not self.object or day.id != self.object.id:
+                    used_days.append(weekday.id)
+        used_days.sort()
+        queryset = DaysOfWeek.objects.filter(
+            training_cycle=self.get_day_key(workout.cycle_kind)).exclude(
+            id__in=used_days).all()
+        context['form'].fields['day'].queryset = queryset
+        label = self.get_cycle(workout.cycle_kind)
+        context['form'].fields['description'].help_text = \
+            _('A description of what is done for this {0} (e.g. '
+              '"Pull {0}") or what body parts are trained (e.g. '
+              "Arms and abs"')'.format(label))
+        context['form'].fields['day'].label = label.capitalize()
+        return context
+
 
 class DayEditView(DayView, UpdateView):
     '''
@@ -90,6 +125,8 @@ class DayEditView(DayView, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(DayEditView, self).get_context_data(**kwargs)
         context['title'] = _(u'Edit {0}').format(self.object)
+        workout = Day.objects.get(pk=self.kwargs['pk']).training
+        context = self.set_context(context, workout)
         return context
 
 
@@ -98,7 +135,7 @@ class DayCreateView(DayView, CreateView):
     Generic view to add a new exercise day
     '''
 
-    title = ugettext_lazy('Add workout day')
+    title = ugettext_lazy('Add workout cycle')
     owner_object = {'pk': 'workout_pk', 'class': Workout}
 
     def form_valid(self, form):
@@ -111,7 +148,11 @@ class DayCreateView(DayView, CreateView):
 
     # Send some additional data to the template
     def get_context_data(self, **kwargs):
+        workout = Workout.objects.filter(pk=self.kwargs['workout_pk']).first()
+        label = self.get_cycle(workout.cycle_kind)
+        self.title = _('Add workout {0}'.format(label))
         context = super(DayCreateView, self).get_context_data(**kwargs)
+        context = self.set_context(context, workout)
         context['form_action'] = reverse(
             'manager:day:add',
             kwargs={'workout_pk': self.kwargs['workout_pk']})

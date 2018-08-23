@@ -216,7 +216,13 @@ def add(request):
     '''
     Add a new workout and redirect to its page
     '''
-    workout = Workout()
+    cycle = request.GET.get('cycle', None)
+    training_cycles = {
+        'micro': 'microcycle',
+        'meso': 'mesocycle',
+        'macro': 'macrocycle'
+    }
+    workout = Workout(cycle_kind=training_cycles.get(cycle, 'micro'))
     workout.user = request.user
     workout.save()
 
