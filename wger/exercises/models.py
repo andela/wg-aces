@@ -35,7 +35,7 @@ from django.core.cache import cache
 from django.core.validators import MinLengthValidator
 from django.conf import settings
 
-from wger.core.models import Language
+from wger.core.models import Language, LicenseAuthor
 from wger.utils.helpers import smart_capitalize
 from wger.utils.managers import SubmissionManager
 from wger.utils.models import AbstractLicenseModel, AbstractSubmissionModel
@@ -337,13 +337,23 @@ class Exercise(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
 
         This is only used when creating exercises (via web or API)
         '''
+        author_name = request.POST.get('license_author')
+        if author_name:
+            author_obj, created = LicenseAuthor\
+                .objects.get_or_create(author_name=author_name)
+            self.license_author = author_obj
         if request.user.has_perm('exercises.add_exercise'):
             self.status = self.STATUS_ACCEPTED
             if not self.license_author:
-                self.license_author = request.get_host().split(':')[0]
+                author_obj1, created = LicenseAuthor\
+                    .objects.get_or_create(
+                        author_name=request.get_host().split(':')[0])
+                self.license_author = author_obj1
         else:
             if not self.license_author:
-                self.license_author = request.user.username
+                author_obj2, created = LicenseAuthor\
+                    .objects.get_or_create(author_name=request.user.username)
+                self.license_author = author_obj2
 
             subject = _('New user submitted exercise')
             message = _(
@@ -462,14 +472,25 @@ class ExerciseImage(AbstractSubmissionModel, AbstractLicenseModel,
 
         This is only used when creating images (via web or API)
         '''
+        author_name = request.POST.get('license_author')
+        if author_name:
+            author_obj, created = LicenseAuthor\
+                .objects.get_or_create(author_name=author_name)
+            self.license_author = author_obj
         if request.user.has_perm('exercises.add_exerciseimage'):
             self.status = self.STATUS_ACCEPTED
             if not self.license_author:
-                self.license_author = request.get_host().split(':')[0]
-
+                # self.license_author = request.get_host().split(':')[0]
+                author_obj1, created = LicenseAuthor\
+                    .objects.get_or_create(
+                        author_name=request.get_host().split(':')[0])
+                self.license_author = author_obj1
         else:
             if not self.license_author:
-                self.license_author = request.user.username
+                # self.license_author = request.user.username
+                author_obj2, created = LicenseAuthor.objects.get_or_create(
+                    author_name=request.user.username)
+                self.license_author = author_obj2
 
             subject = _('New user submitted image')
             message = _(u'The user {0} submitted a new image\

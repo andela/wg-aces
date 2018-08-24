@@ -20,12 +20,14 @@ from wger.exercises.models import ExerciseImage, ExerciseComment
 
 
 class ExerciseImageForm(forms.ModelForm):
+    license_author = forms.CharField(label="Author",
+                                     required=False)
+
     class Meta:
         model = ExerciseImage
         fields = ('image',
                   'is_main',
-                  'license',
-                  'license_author')
+                  'license')
 
 
 class CommentForm(forms.ModelForm):
