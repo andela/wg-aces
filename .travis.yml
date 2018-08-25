@@ -62,7 +62,7 @@ script:
 
   # Code coverage
   - coverage report
-
+after_success: coveralls
 notifications:
   slack: andela:pAK2JDCTIKuXAS6Hw5uUJEr6
 deploy:
