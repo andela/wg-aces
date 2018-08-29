@@ -50,4 +50,7 @@ urlpatterns = [
     url(r'^api/get_weight_data/$',  # JS
         views.get_weight_data,
         name='weight-data'),
+    url(r'^api/users_weight_data/$',  # JS
+        views.get_user_weight_data,
+        name='user-weight-data-comparison'),
 ]

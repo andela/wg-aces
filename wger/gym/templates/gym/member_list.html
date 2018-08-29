@@ -88,6 +88,124 @@
 {% endfor %}
 </tbody>
 </table>
+<!-- error message modal -->
+<div class="modal fade" role="dialog" aria-hidden="true" id="error-no-users-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Error</h4>
+            </div>
+            <div class="modal-body">
+                <h4 class="modal-title" id="msg">Please choose users first before clicking</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End of error message modal-->
+
+<!-- charts modal -->
+<div id="compare-users-modal" class="modal fade bs-example-modal-lg" role="dialog">
+    <div class="modal-dialog modal-lg" role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>User weights comparison</h4>
+            </div>
+            <div class="modal-body">
+                <canvas id="comparison-canvas"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End of charts modal-->
+
+<script>
+        var selectedUsers = [];
+        function selectUser(event, id) {
+          if (event.checked === true) {
+            selectedUsers.push(id);
+          } else {
+            selectedUsers.pop(id);
+          }
+        }
+         function compareUsers(event) {
+          if (selectedUsers.length === 0) {
+            $("#error-no-users-modal").modal("show");
+            return;
+          }
+          var users = selectedUsers.join(",");
+          var colors = [
+              "#800000",
+              "#FF0000",
+              "#00FFFF",
+              "#FF00FF",
+              "#000000",
+              "#FFFF00",
+              "#008000",
+              "#0000A0",
+              "#FFB81D",
+              "#AA0050",
+            ];
+          var url = "/weight/api/users_weight_data/?users=" + users
+          $.ajax({
+            url: url,
+            type: "GET",
+            success: function (response) {
+              var chartData = response.data.map(function (data, index) {
+                return {
+                  label: data.label,
+                  data: data.data,
+                  fill: false,
+                  backgroundColor: colors[index],
+                  borderColor: colors[index],
+                  borderWidth: 3
+                };
+              });
+              chartLabels = response.labels.filter(function (elem, index, self) {
+                return index === self.indexOf(elem);
+              });
+              chartLabels = chartLabels.reverse();
+              var ChartData = {
+                labels: chartLabels,
+                datasets: chartData
+              };
+               var chartOptions = {
+                responsive: true,
+                // legend: {
+                //   position: "top"
+                // },
+                title: {
+                  display: true,
+                  text: "Weight Data against days:"
+                },
+                scales: {
+                  yAxes: [
+                    {
+                      ticks: {
+                        beginAtZero: false
+                      }
+                    }
+                  ]
+                }
+              };
+              //creating the chart
+              var ctx = document.getElementById("comparison-canvas").getContext("2d");
+              var myLineChart = new Chart(ctx, {
+                type: "line",
+                data: ChartData,
+                options: chartOptions
+              });
+              $("#compare-users-modal").modal("show");
+            }
+          });
+        }
+        </script>
 {% endblock %}
 
 

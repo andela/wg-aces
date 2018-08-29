@@ -30,6 +30,7 @@ from django.db.models import Min
 from django.db.models import Max
 from django.views.generic import CreateView
 from django.views.generic import UpdateView
+from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -217,3 +218,27 @@ class WeightCsvImportFormPreview(FormPreview):
         return HttpResponseRedirect(reverse(
             'weight:overview',
             kwargs={'username': request.user.username}))
+
+
+@api_view(['GET'])
+def get_user_weight_data(request):
+    users = request.GET.get('users', '')
+    usernames = users.split(',')
+    chartData = []
+    labels = []
+    for username in usernames:
+        user = User.objects.filter(username=username).first()
+        # slice by the number of the last weights of  user
+        weights = WeightEntry.objects.filter(user=user).order_by('-date')[:6]
+        data = []
+        for w in weights:
+            labels.append(w.date)
+            data.append(w.weight)
+        chartData.append({
+            'label': username,
+            'data': data
+        })
+    return Response({
+        'labels': labels,
+        'data': chartData
+    })
