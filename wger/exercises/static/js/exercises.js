@@ -52,6 +52,63 @@ function wgerHighlightMuscle(element) {
 }
 
 /*
+ highlight both muscles and excercises on hover
+ */
+function wgerHighlightMuscelAndExcercises(element) {
+  var position = 'True';
+  var $muscle;
+  var muscleId = 1;
+  var divId;
+  var isFront;
+  var Item;
+  $('.back').hide();
+  $('.front').show();
+
+
+  $(element).hover(function (e) {
+    e.preventDefault();
+    wgerHighlightMuscle(this);
+    isFront = $(this).data('isFront');
+    if (isFront === 'True') {
+      position = 'front';
+      $('.back').hide();
+      $('.' + position + '').show();
+    } else {
+      position = 'back';
+      $('.front').hide();
+      $('.' + position + '').show();
+    }
+  });
+  $('object').load(function () {
+    $('object').contents().find('path').hover(function (e) {
+      e.preventDefault();
+      muscleId = e.target.getAttribute('muscle');
+      divId = 'muscle-' + muscleId + '';
+      if (position === 'True') {
+        position = 'front';
+      }
+      $('#muscle-system').css('background-image',
+          'url(/static/images/muscles/main/muscle-' + muscleId + '.svg),' +
+           'url(/static/images/muscles/muscular_system_' + position + '.svg)');
+
+        // Reset all other highlighted muscles
+      $muscle = $('.muscle');
+      $muscle.removeClass('muscle-active');
+      $muscle.addClass('muscle-inactive');
+      Item = document.querySelectorAll("[data-target='muscle-" + muscleId + "']");
+
+      // // Highlight the current one
+      $(Item).removeClass('muscle-inactive');
+      $(Item).addClass('muscle-active');
+
+      // show corresponding excercise
+      $('.exercise-list').hide();
+      $('#' + divId).show();
+    });
+  });
+}
+
+/*
  D3js functions
  */
 

@@ -86,6 +86,7 @@ a img{
     visibility: hidden;
 }
 
+
 tr:hover .editoptions, tbody tr:hover td .editoptions, ul:hover .editoptions
 {
     visibility: visible;
@@ -138,6 +139,15 @@ div.muscle-background
     background-size: 150px;
     background-repeat: no-repeat;
 }
+
+#muscle-sys{
+    display: block;
+    transform: translate(-25px, -48px)scale(0.75);
+    opacity: 0;
+    position: absolute;
+    left: 14px;
+    top: 48px;
+ }
 
 /*
  * Set an additional padding to the generated DIV on the edit set page
