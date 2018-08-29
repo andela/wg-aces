@@ -89,6 +89,9 @@ INSTALLED_APPS = (
 
     # django social login
     'social_django',
+
+    # Django Timezone field
+    'timezone_field',
 )
 
 # added list of external libraries to be installed by bower
@@ -134,6 +137,9 @@ MIDDLEWARE_CLASSES = (
 
     # Django social
     'social_django.middleware.SocialAuthExceptionMiddleware',
+
+    # Sets the timezone of current session
+    'wger.utils.middleware.TimezoneMiddleware'
 )
 
 AUTHENTICATION_BACKENDS = (

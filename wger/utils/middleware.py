@@ -16,6 +16,7 @@
 Custom middleware
 '''
 
+import pytz
 import logging
 
 from django.conf import settings
@@ -23,6 +24,7 @@ from django.contrib import auth
 from django.utils.functional import SimpleLazyObject
 from django.contrib.auth import login as django_login
 
+from django.utils import timezone
 from wger.core.demo import create_temporary_user
 
 
@@ -72,6 +74,15 @@ def get_user(request):
 
         request._cached_user = user
     return request._cached_user
+
+
+class TimezoneMiddleware(object):
+    def process_request(self, request):
+        tzname = request.session.get('django_timezone')
+        if tzname:
+            timezone.activate(pytz.timezone(tzname))
+        else:
+            timezone.deactivate()
 
 
 class WgerAuthenticationMiddleware(object):

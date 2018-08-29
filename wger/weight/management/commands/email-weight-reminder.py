@@ -14,13 +14,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 
-import datetime
 
 from django.template import loader
 from django.core.management.base import BaseCommand
 from django.core import mail
 from django.utils.translation import ugettext_lazy as _
-from django.utils import translation
+from django.utils import translation, timezone
 from django.conf import settings
 
 from django.contrib.sites.models import Site
@@ -47,7 +46,7 @@ class Command(BaseCommand):
             if not profile.user.email:
                 continue
 
-            today = datetime.datetime.now().date()
+            today = timezone.now().date()
 
             try:
                 last_entry = WeightEntry.objects.filter(
