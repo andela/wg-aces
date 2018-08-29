@@ -40,6 +40,7 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserPreferencesForm(forms.ModelForm):
+
     class Meta:
         model = UserProfile
         fields = ('show_comments',
@@ -52,6 +53,7 @@ class UserPreferencesForm(forms.ModelForm):
                   'timer_active',
                   'timer_pause',
                   'ro_access',
+                  'user_timezone',
                   'num_days_weight_reminder')
 
 

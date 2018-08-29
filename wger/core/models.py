@@ -25,6 +25,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from timezone_field import TimeZoneField
 from wger.gym.models import Gym
 
 from wger.utils.constants import TWOPLACES
@@ -227,6 +228,14 @@ by the US Department of Agriculture. It is extremely complete, with around
                     'workouts. This does not affect the '
                     'language used on the website.'),
         default=2)
+
+    user_timezone = TimeZoneField(
+        verbose_name=_('Timezone'),
+        help_text=_('Enter exact timezone for your location'),
+        default='UTC')
+    '''
+    This specifies the user's specific timezone
+    '''
 
     timer_active = models.BooleanField(
         verbose_name=_('Use pauses in workout timer'),

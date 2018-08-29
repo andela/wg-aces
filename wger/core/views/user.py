@@ -281,6 +281,9 @@ def preferences(request):
                                    instance=request.user.userprofile)
         form.user = request.user
 
+        # Set timezone for current session
+        request.session['django_timezone'] = form.data['user_timezone']
+
         # Save the data if it validates
         if form.is_valid():
             form.save()

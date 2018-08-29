@@ -16,7 +16,9 @@
 
 
 from django.contrib.auth.models import User
+from django.contrib.auth.signals import user_logged_in
 from django.db.models.signals import post_save
+from django.utils import timezone
 
 from wger.core.models import UserProfile, UserCache, UserApi
 from wger.utils.helpers import disable_for_loaddata
@@ -49,6 +51,13 @@ def create_user_cache(sender, instance, created, **kwargs):
         UserCache.objects.create(user=instance)
 
 
+def set_timezone(sender, user, request, **kwargs):
+    tzname = user.userprofile.user_timezone
+    if tzname:
+            timezone.activate(tzname)
+
+
+user_logged_in.connect(set_timezone)
 post_save.connect(create_user_profile, sender=User)
 post_save.connect(create_user_api, sender=User)
 post_save.connect(create_user_cache, sender=User)
