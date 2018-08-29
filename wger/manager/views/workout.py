@@ -17,9 +17,11 @@
 import logging
 import uuid
 import datetime
+import json
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse
 from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy, ugettext as _
@@ -227,6 +229,28 @@ def add(request):
     workout.save()
 
     return HttpResponseRedirect(workout.get_absolute_url())
+
+
+@login_required
+def export_json(request):
+    '''
+    Exports the saved workouts as json data
+    '''
+    workouts = Workout.objects.filter(user_id=request.user.id)
+    workout_id_list = []
+    for workout in workouts:
+        workout_id_list.append(workout.id)
+    workout_list = []
+    for workout_id in workout_id_list:
+        days = Day.objects.filter(training=workout_id)
+        for day in days:
+            item = day.get_json_representation()
+            workout_list.append(item)
+    data = json.dumps(workout_list)
+    response = HttpResponse(data, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename=Workout.json'
+    response['Content-Length'] = len(response.content)
+    return response
 
 
 class WorkoutDeleteView(WgerDeleteMixin, LoginRequiredMixin, DeleteView):
