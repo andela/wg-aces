@@ -565,6 +565,80 @@ class Day(models.Model):
                 },
                 'set_list': canonical_repr}
 
+    def get_json_representation(self):
+        json_rep, muscles_front, muscles_front_name = [], [], []
+        muscles_back, muscles_back_name = [], []
+        muscles_front_secondary, muscles_front_secondary_name = [], []
+        muscles_back_secondary, muscles_back_secondary_name = [], []
+
+        for set_obj in self.set_set.select_related():
+            exercise_tmp = []
+            for exercise in set_obj.exercises.select_related():
+                muscles_back_name, muscles_back, muscles_front_name,\
+                    muscles_front = get_primary_muscle_rep(exercise)
+                muscles_back_secondary_name, muscles_back_secondary,\
+                    muscles_front_secondary_name, muscles_front_secondary = \
+                    get_sec_muscle(exercise, muscles_front, muscles_back)
+                exercise_tmp.append({'exercise': exercise.name})
+            json_rep.append({'set': set_obj.id, 'exercise_list': exercise_tmp,
+                             'muscles': get_muscles_dict(
+                                 muscles_back_name, muscles_front_name,
+                                 muscles_front_secondary_name)})
+        tmp_days_of_week = get_days_rep(self)
+
+        return {'Workout_description': self.description,
+                'days_of_week': {
+                    'text': u', '.join([i.day_of_week
+                                        for i in tmp_days_of_week])},
+                'muscles': get_muscles_dict(
+                    muscles_back_name, muscles_front_name,
+                    muscles_front_secondary_name),
+                'set_list': json_rep}
+
+
+def get_muscles_dict(muscles_bn, muscles_fn, muscles_fsn):
+    return {
+        'back': muscles_bn, 'front': muscles_fn,
+        'frontsecondary': muscles_fsn,
+        'backsecondary': muscles_fsn
+    }
+
+
+def get_primary_muscle_rep(exercise):
+    muscles_back_name, muscles_back = [], []
+    muscles_front_name, muscles_front = [], []
+    for muscle in exercise.muscles.all():
+        if muscle.is_front and muscle.id not in muscles_front:
+            muscles_front.append(muscle.id)
+            muscles_front_name.append(muscle.name)
+        elif not muscle.is_front and muscle.id not in muscles_back:
+            muscles_back.append(muscle.id)
+            muscles_back_name.append(muscle.name)
+    return muscles_back_name, muscles_back, muscles_front_name,\
+        muscles_front
+
+
+def get_sec_muscle(exercise, muscles_front, muscles_back):
+    muscles_back_secondary_name, muscles_back_secondary = [], []
+    muscles_front_secondary_name, muscles_front_secondary = [], []
+    for muscle in exercise.muscles_secondary.all():
+        if muscle.is_front and muscle.id not in muscles_front:
+            muscles_front_secondary.append(muscle.id)
+            muscles_front_secondary_name.append(muscle.name)
+        elif not muscle.is_front and muscle.id not in muscles_back:
+            muscles_back_secondary.append(muscle.id)
+            muscles_back_secondary_name.append(muscle.name)
+    return muscles_back_secondary_name, muscles_back_secondary,\
+        muscles_front_secondary_name, muscles_front_secondary
+
+
+def get_days_rep(obj):
+    # Days of the week
+    tmp_days_of_week = []
+    for day_of_week in obj.day.select_related():
+        tmp_days_of_week.append(day_of_week)
+    return tmp_days_of_week
+
 
 @python_2_unicode_compatible
 class Set(models.Model):

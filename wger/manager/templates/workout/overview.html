@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load staticfiles %}
+{% load wger_extras %}
 
 {% block title %}{% trans "Your workouts" %}{% endblock %}
 
@@ -37,6 +38,20 @@
 
 
 {% block options %}
+<div class="btn-group">
+    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="{% fa_class 'cog' %}"></span>
+        {% trans "Options" %}
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdown">
+        <li>
+            <a href="{% url 'manager:workout:export-json' %}" target="_blank">
+                <span class="{% fa_class 'download' %}"></span>
+                {% trans "Export as JSON" %}
+            </a>
+        </li>
+    </ul>
+</div>
 <div class="btn-group">
     <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
        Add workout
