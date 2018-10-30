@@ -54,7 +54,7 @@ python3-openid==3.1.0
 pytz==2018.5
 rcssmin==1.0.6
 reportlab==3.5.2
-requests==2.19.1
+requests==2.20.0
 requests-mock==1.5.2
 requests-oauthlib==1.0.0
 rjsmin==1.0.12
