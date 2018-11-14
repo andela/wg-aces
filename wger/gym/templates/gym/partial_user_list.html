@@ -13,6 +13,8 @@ $(document).ready( function () {
     });
 });
 </script>
+
+<button class="btn btn-primary" onClick="compareUsers()">Compare Users</button>
 <h4>{% trans "Users" %}</h4>
 <ul class="nav nav-tabs" role="memberlist">
     <li class="nav-item active">
@@ -28,6 +30,7 @@ $(document).ready( function () {
         <table class="table table-hover" id="main_active_member_list">
             <thead>
             <tr>
+                <th></th>
                 {% for key in user_table.keys %}
                     <th>{{ key }}</th>
                 {% endfor %}
@@ -37,6 +40,10 @@ $(document).ready( function () {
             {% for current_user in user_table.users %}
             {% if current_user.obj.is_active %}
             <tr>
+                <td>
+                    <input onchange="selectUser(this, `{{current_user.obj.username}}`)"
+                        name="{{current_user.obj}}"
+                        type="checkbox">
                 <td>
                     {{current_user.obj.pk}}
                 </td>

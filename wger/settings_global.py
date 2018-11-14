@@ -107,7 +107,8 @@ BOWER_INSTALLED_APPS = (
     'metrics-graphics',
     'devbridge-autocomplete#1.2.x',
     'sortablejs#1.4.x',
-    'bootstrap-social'
+    'bootstrap-social',
+    'chartjs',
 )
 
 
